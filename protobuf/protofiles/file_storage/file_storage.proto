@@ -1,0 +1,47 @@
+syntax = "proto3";
+
+package file_storage;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+option go_package = "github.com/DKhorkov/file_storage/protobuf/file_storage;filestorage";
+
+
+service FileService {
+  rpc Upload(stream UploadRequest) returns (UploadResponse) {}
+  rpc Download(DownloadRequest) returns(stream DownloadResponse);
+  rpc ShowFiles(google.protobuf.Empty) returns (ShowFilesResponse) {};
+}
+
+message UploadRequest {
+  string filename = 1;
+  string fileExtension = 2;
+  bytes chunk = 3;
+}
+
+message UploadResponse {
+  string fileId = 1;
+}
+
+message DownloadRequest{
+  string fileId = 1;
+}
+
+message DownloadResponse{
+  string filename = 1;
+  string extension = 2;
+  bytes chunk = 3;
+}
+
+message ShowFileResponse {
+  string fileID = 1;
+  string filename = 2;
+  string extension = 3;
+  google.protobuf.Timestamp createdAt = 4;
+  google.protobuf.Timestamp updatedAt = 5;
+}
+
+message ShowFilesResponse {
+  repeated ShowFileResponse files = 1;
+}

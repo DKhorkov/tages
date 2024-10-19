@@ -1,0 +1,63 @@
+version: '3'
+
+tasks:
+  create_folders:
+    desc: "Create base folders for files and logs."
+    dir: ../
+    aliases:
+      - folders
+    cmds:
+      - mkdir -p upload
+      - mkdir -p download
+      - mkdir -p logs
+
+  setup_proto:
+    desc: "Install all go-proto requirements."
+    aliases:
+      - setup
+    cmds:
+      - sudo snap install protobuf --classic
+      - go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+      - go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+      - export PATH="$PATH:$(go env GOPATH)/bin"
+      - task: create_protobuf_folders
+
+  create_protobuf_folders:
+    desc: "Create folders structure for protobuf usage."
+    internal: true
+    dir: ../
+    cmds:
+      - mkdir -p protobuf/protofiles
+      - mkdir -p protobuf/generated/go
+
+  grpc_generate:
+    desc: "Generate code from .proto files."
+    aliases:
+      - gen
+      - generate
+      - grpc
+    dir: ../
+    cmds:
+      - protoc --proto_path=protobuf/protofiles ./protobuf/protofiles/file_storage/file_storage.proto --go_out=./protobuf/generated/go --go_opt=paths=source_relative --go-grpc_out=./protobuf/generated/go --go-grpc_opt=paths=source_relative
+
+  linters:
+    desc: "Run linters."
+    aliases:
+      - lint
+    dir: ../
+    cmds:
+      - golangci-lint run -v --fix
+
+  run_server:
+    desc: "Run grpc server."
+    aliases:
+      - server
+    dir: ../
+    cmd: go run cmd/server/main.go
+
+  run_client:
+    desc: "Run grpc client."
+    aliases:
+      - client
+    dir: ../
+    cmd: go run cmd/client/main.go
